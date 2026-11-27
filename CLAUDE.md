@@ -63,24 +63,23 @@ Full rule: [Checkpoints and storage](https://ersilia.gitbook.io/ersilia-book/ers
 
 ## Versioning
 
-Models follow [semantic versioning](https://semver.org/) (`vMAJOR.MINOR.PATCH`) via GitHub releases — the `retag-release-docker.yml` workflow propagates the tag to the published Docker image. The rules and the pre-release checklist are in [Model releases](https://ersilia.gitbook.io/ersilia-book/ersilia-model-hub/model-contribution/example-of-the-model-incorporation-workflow#model-releases) in the Ersilia Book; in short:
+Models follow [semantic versioning](https://semver.org/) (`vMAJOR.MINOR.PATCH`). Releases are automatic: every pull request to `main` carries exactly one version label, and after the merge the workflows release the model from it and tag the Docker image. The rules are in [Model versioning](https://ersilia.gitbook.io/ersilia-book/ersilia-model-hub/model-contribution/model-versioning) in the Ersilia Book; in short:
 
-- **MAJOR** — checkpoints change; output columns added, removed, renamed, reordered or retyped; inputs that returned a value now return empty; values for valid inputs change beyond 1e-4 (whatever the cause); for generators, a new sampling method, model or selection criteria.
-- **MINOR** — code, dependency or image changes with the same columns and outputs within 1e-4: dependency updates and the rebuilds they need, speed-ups, smaller images, a GPU option (GPU outputs may differ slightly; report the difference), fixes where failing inputs now return a result, the same weights in another file format, moving checkpoints into `model/checkpoints/`.
-- **PATCH** — no change to code, dependencies, checkpoints or outputs: metadata, README, `run_columns.csv` descriptions or direction, a rebuilt image of unchanged code.
-- **No release** — a pure storage move between Git LFS, Git and eosvc, or removing a duplicate copy, with identical files (check every sha256), code and outputs; wait for the PR test, then merge with `[skip ci]`.
+- **`semver:major`** — checkpoints change; output columns added, removed, renamed, reordered or retyped; inputs that returned a value now return empty; values for valid inputs change beyond 1e-4 (whatever the cause); for generators, a new sampling method, model or selection criteria. A new incorporation always uses it; its first release is still `v1.0.0`.
+- **`semver:minor`** — code, dependency or image changes with the same columns and outputs within 1e-4: dependency updates and the rebuilds they need, speed-ups, smaller images, a GPU option (GPU outputs may differ slightly; report the difference), fixes where failing inputs now return a result, the same weights in another file format, moving checkpoints into `model/checkpoints/`. Moving checkpoints between Git and eosvc also needs at least this label, even with identical files (check every sha256).
+- **`semver:patch`** — metadata only: `metadata.yml`, README, LICENSE, `run_columns.csv` descriptions or direction. The image is not rebuilt.
+- **`no-release`** — only `.github/`, `.gitignore`, `.gitattributes`, `CLAUDE.md` or `AGENTS.md` change; nothing runs after the merge.
 
-Never change version without asking the user.
+The `Check version label` check fails if the label is missing or lower than the change requires. Never choose or change a label without asking the user.
 
 ## GitHub Actions workflows
 
 The workflows in `.github/workflows/` are thin wrappers around reusable workflows in [`ersilia-os/ersilia-model-workflows`](https://github.com/ersilia-os/ersilia-model-workflows) — that's where the actual test, S3 upload, and Docker pack logic lives. Read it there before debugging CI behaviour, and do not edit the local YAMLs to work around a failure.
 
-- **Open a PR; don't push to `main`.** `test-model-pr.yml` gives a fast signal on a PR. `upload-model.yml` runs on push to `main` and chains `test-model-source` → `upload-model-to-s3` → `upload-ersilia-pack`; a broken model wastes S3/DockerHub budget.
-- **A model isn't done until every workflow is green.** Status: PR test, source test, S3 upload, ersilia-pack image build, image test. Check every job of "Test model image", not only the run: a green run can hide a failed `test-image-arm64`. `test-image-amd64`, `retag-image` and `post-model-upload` must pass. `test-image-arm64` should pass; if the model cannot run on ARM64 for now, set `Docker Architecture` to AMD64 only in the metadata and say so in the release notes.
-- **Never "Re-run jobs" on "Test model image" after `post-model-upload` has pushed the metadata once** — the re-run checks out the old commit and its push is rejected. Start a fresh run instead (see the next point).
+- **Open a PR; don't push to `main`.** `test-model-pr.yml` tests the PR's head commit, and `check-version-label.yml` checks its version label. `upload-model.yml` runs on push to `main`: it reads the merged PR's label, then chains `test-model-source` → `upload-model-to-s3` → `upload-ersilia-pack`; a broken model wastes S3/DockerHub budget.
+- **A model isn't done until every workflow is green.** Status: PR test, version label, source test, S3 upload, ersilia-pack image build, image test, release. Check every job of "Test model image", not only the run: a green run can hide a failed `test-image-arm64`. `test-image-amd64`, `retag-image`, `post-upload` and `release` must pass. arm64 is optional: if it fails to build or test, the image is published for amd64 only and `Docker Architecture` is set accordingly; say so in the PR. For `semver:patch` and `no-release` the image is not rebuilt, so the image test and `post-upload` are skipped by design.
 - **Inspect failures with `gh`.** `gh run list --limit 5`, then `gh run view <id> --log-failed`. Reproduce the failure locally (run `run.sh` against `examples/run_input.csv` and diff against `run_output.csv`) before pushing a fix.
-- **Re-running uploads.** `upload-model.yml` supports `workflow_dispatch` — after merging a fix to `main`, trigger it manually rather than pushing an empty commit.
+- **Re-running.** A failed `post-upload` can be re-run. `upload-model.yml` also supports `workflow_dispatch` — trigger it rather than pushing an empty commit. A dispatched run rebuilds and tests the model but releases nothing once the model has a release, so a release is then made by hand.
 
 ## Ersilia ecosystem
 

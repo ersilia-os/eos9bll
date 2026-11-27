@@ -1,1 +1,13 @@
 name,type,direction,description
+net_charge_ph1_2,float,high,Predicted average net charge at pH 1.2 derived from the predicted protonation states
+net_charge_ph4_5,float,high,Predicted average net charge at pH 4.5 derived from the predicted protonation states
+net_charge_ph6_8,float,high,Predicted average net charge at pH 6.8 derived from the predicted protonation states
+net_charge_ph7_4,float,high,Predicted average net charge at pH 7.4 derived from the predicted protonation states
+pka_p4_p3,float,high,Macroscopic pKa for the step from net charge +4 to +3 (empty if no such step is predicted)
+pka_p3_p2,float,high,Macroscopic pKa for the step from net charge +3 to +2 (empty if no such step is predicted)
+pka_p2_p1,float,high,Macroscopic pKa for the step from net charge +2 to +1 (empty if no such step is predicted)
+pka_p1_0,float,high,Macroscopic pKa for the step from net charge +1 to 0 (empty if no such step is predicted)
+pka_0_m1,float,high,Macroscopic pKa for the step from net charge 0 to -1 (empty if no such step is predicted)
+pka_m1_m2,float,high,Macroscopic pKa for the step from net charge -1 to -2 (empty if no such step is predicted)
+pka_m2_m3,float,high,Macroscopic pKa for the step from net charge -2 to -3 (empty if no such step is predicted)
+pka_m3_m4,float,high,Macroscopic pKa for the step from net charge -3 to -4 (empty if no such step is predicted)
