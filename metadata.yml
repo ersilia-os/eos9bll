@@ -2,15 +2,14 @@ Identifier: eos9bll
 Slug: pkasso
 Status: In progress
 Title: Macroscopic pKa and Protonation States
-Description: >-
-  Predicts whole-molecule (macroscopic) pKa values and the pH-dependent net
-  charge of small molecules with pKasso from Bind Research. Site pKa predictions
-  from MolGpKa and a Uni-pKa model retrained with IUPAC data are combined into
-  populations of every protonation state. On six experimental benchmarks this
-  mixed mode, with the single Uni-pKa fold run here on CPU, gives a mean
-  absolute error of 0.61 pKa units. Validated only on small organic molecules;
-  the input tautomer is kept for all states, and state populations are checked
-  only qualitatively.
+Description: Predicts whole-molecule (macroscopic) pKa values and the 
+  pH-dependent net charge of small molecules with pKasso from Bind Research. 
+  Site pKa predictions from MolGpKa and a Uni-pKa model retrained with IUPAC 
+  data are combined into populations of every protonation state. On six 
+  experimental benchmarks this mixed mode, with the single Uni-pKa fold run here
+  on CPU, gives a mean absolute error of 0.61 pKa units. Validated only on small
+  organic molecules; the input tautomer is kept for all states, and state 
+  populations are checked only qualitatively.
 Deployment:
   - Local
 Source: Local
@@ -24,7 +23,8 @@ Output:
   - Value
 Output Dimension: 12
 Output Consistency: Fixed
-Interpretation: Net charge at pH 1.2, 4.5, 6.8, 7.4, plus macroscopic pKa for each net-charge step from +4 to -4.
+Interpretation: Net charge at pH 1.2, 4.5, 6.8, 7.4, plus macroscopic pKa for 
+  each net-charge step from +4 to -4.
 Tag:
   - pKa
   - ADME
@@ -38,3 +38,4 @@ Publication: https://doi.org/10.26434/chemrxiv.15011954/v1
 Source Code: https://github.com/bindresearch/pkasso
 License: Non-commercial
 Contributor: TiagoJanela
+Incorporation Date: '2026-11-25'
