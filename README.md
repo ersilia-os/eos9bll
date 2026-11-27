@@ -3,6 +3,7 @@
 Predicts whole-molecule (macroscopic) pKa values and the pH-dependent net charge of small molecules with pKasso from Bind Research. Site pKa predictions from MolGpKa and a Uni-pKa model retrained with IUPAC data are combined into populations of every protonation state. On six experimental benchmarks this mixed mode, with the single Uni-pKa fold run here on CPU, gives a mean absolute error of 0.61 pKa units. Validated only on small organic molecules; the input tautomer is kept for all states, and state populations are checked only qualitatively.
 
 This model was incorporated on 2026-11-25.
+Last packaged on 2026-11-27.
 
 ## Information
 ### Identifiers
@@ -43,12 +44,19 @@ _10 of 12 columns are shown_
 ### Source and Deployment
 - **Source:** `Local`
 - **Source Type:** `External`
+- **DockerHub**: [https://hub.docker.com/r/ersiliaos/eos9bll](https://hub.docker.com/r/ersiliaos/eos9bll)
+- **Docker Architecture:** `AMD64`, `ARM64`
 - **S3 Storage**: [https://ersilia-models-zipped.s3.eu-central-1.amazonaws.com/eos9bll.zip](https://ersilia-models-zipped.s3.eu-central-1.amazonaws.com/eos9bll.zip)
 
 ### Resource Consumption
 - **Model Size (Mb):** `546`
 - **Environment Size (Mb):** `1735`
+- **Image Size (Mb):** `927.87`
 
+**Computational Performance (seconds):**
+- 10 inputs: `33.75`
+- 100 inputs: `-1`
+- 10000 inputs: `-1`
 
 ### References
 - **Source Code**: [https://github.com/bindresearch/pkasso](https://github.com/bindresearch/pkasso)
