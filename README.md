@@ -1,56 +1,85 @@
-# Ersilia Model Template
+# Macroscopic pKa and Protonation States
 
-This document contains the instructions to incorporate a model. Please follow along to bring your model into the [Ersilia Model Hub](https://github.com/ersilia-os/ersilia). After successful incorporation of the model, this README file will be **automatically updated** to reflect model specific details.
+Predicts whole-molecule (macroscopic) pKa values and the pH-dependent net charge of small molecules with pKasso from Bind Research. Site pKa predictions from MolGpKa and a Uni-pKa model retrained with IUPAC data are combined into populations of every protonation state. On six experimental benchmarks this mixed mode, with the single Uni-pKa fold run here on CPU, gives a mean absolute error of 0.61 pKa units. Validated only on small organic molecules; the input tautomer is kept for all states, and state populations are checked only qualitatively.
 
-Further information about model incorporation can be found in our [Documentation](https://ersilia.gitbook.io/ersilia-book/ersilia-model-hub/model-contribution/).
+This model was incorporated on 2026-11-25.
 
-## Template Structure
+## Information
+### Identifiers
+- **Ersilia Identifier:** `eos9bll`
+- **Slug:** `pkasso`
 
-The model template is organized in two parts, i.e. the (a) model code and parameters, and (b) the metadata and installation instructions
+### Domain
+- **Task:** `Annotation`
+- **Subtask:** `Property calculation or prediction`
+- **Biomedical Area:** `Any`
+- **Target Organism:** `Any`
+- **Tags:** `pKa`, `ADME`
 
-### The Model Folder
+### Input
+- **Input:** `Compound`
+- **Input Dimension:** `1`
 
-Generally, two important pieces make up a model that goes into the Ersilia Model Hub: (a) the model checkpoints and (b) the code to load those checkpoints and make predictions with that model (framework). With that in mind, the model folder is organised as follows:
+### Output
+- **Output Dimension:** `12`
+- **Output Consistency:** `Fixed`
+- **Interpretation:** Net charge at pH 1.2, 4.5, 6.8, 7.4, plus macroscopic pKa for each net-charge step from +4 to -4.
 
-- `model/checkpoints` contains checkpoint files required by the model. This directory is optional.
-- `model/framework` contains the driver code to load the model and run inferences from it. There are two files of interest here: `code/main.py`, and `run.sh`. The `code/main.py` file contains the code to load the model and run it, and can refer to other files and packages contained within the `code` directory. It is split into two functions: `load_tool()`, which does the slow, one-time setup (imports, checkpoints, building the model) and returns the loaded model, and `run_tool(model, input_file, output_file)`, which processes one batch. Keep the `if __name__ == "__main__":` block that calls `run_tool(load_tool(), sys.argv[1], sys.argv[2])`, so that `run.sh` keeps working. With the default `run.sh`, Ersilia can keep the model loaded between batches. The `run.sh` serves two purposes, it runs the code in the `main.py` file and also tells Ersilia that this model server will have a `run` API. The `run.sh` file is mandatory while the `code/main.py` is optional.
-- `model/framework/examples` contains an example input file (should have three smiles under the header smiles, this file can be generated with the `ersilia example` command) and the output of running the `run.sh` on the example inputs. Both `run_input.csv` and `run_output.csv` are mandatory.
-- `model/framework/columns` contains a template of the expected output columns, indicating their name, type (float, integer or string), direction (high, low, or empty) and a short one-sentence description. For more rules on how to fill in this file, check our [documentation](https://ersilia.gitbook.io/ersilia-book/ersilia-model-hub/model-contribution/model-template). The `run_columns.csv` file is mandatory.
+Below are the **Output Columns** of the model:
+| Name | Type | Direction | Description |
+|------|------|-----------|-------------|
+| net_charge_ph1_2 | float | high | Predicted average net charge at pH 1.2 derived from the predicted protonation states |
+| net_charge_ph4_5 | float | high | Predicted average net charge at pH 4.5 derived from the predicted protonation states |
+| net_charge_ph6_8 | float | high | Predicted average net charge at pH 6.8 derived from the predicted protonation states |
+| net_charge_ph7_4 | float | high | Predicted average net charge at pH 7.4 derived from the predicted protonation states |
+| pka_p4_p3 | float | high | Macroscopic pKa for the step from net charge +4 to +3 (empty if no such step is predicted) |
+| pka_p3_p2 | float | high | Macroscopic pKa for the step from net charge +3 to +2 (empty if no such step is predicted) |
+| pka_p2_p1 | float | high | Macroscopic pKa for the step from net charge +2 to +1 (empty if no such step is predicted) |
+| pka_p1_0 | float | high | Macroscopic pKa for the step from net charge +1 to 0 (empty if no such step is predicted) |
+| pka_0_m1 | float | high | Macroscopic pKa for the step from net charge 0 to -1 (empty if no such step is predicted) |
+| pka_m1_m2 | float | high | Macroscopic pKa for the step from net charge -1 to -2 (empty if no such step is predicted) |
 
-### Metadata, Installation, and Other Templated Files
+_10 of 12 columns are shown_
+### Source and Deployment
+- **Source:** `Local`
+- **Source Type:** `External`
 
-In addition to adding the model checkpoints, the code for running them and the example and columns file, you'll need to edit the following:
+### Resource Consumption
 
-#### Model Dependencies
 
-Use the `install.yml` file to specify all the necessary dependencies required by the model to successfully run. This dependency configuration file has two top level keys:
+### References
+- **Source Code**: [https://github.com/bindresearch/pkasso](https://github.com/bindresearch/pkasso)
+- **Publication**: [https://doi.org/10.26434/chemrxiv.15011954/v1](https://doi.org/10.26434/chemrxiv.15011954/v1)
+- **Publication Type:** `Preprint`
+- **Publication Year:** `2026`
+- **Ersilia Contributor:** [TiagoJanela](https://github.com/TiagoJanela)
 
-- The `python` field expects a string value denoting a python version (e.g. `"3.12"`)
-- The `commands` field expects a list of values, each of which is a list on its own, denoting the dependencies required by the model. Currently, `pip` and `conda` dependencies are supported using this syntax. 
-    - `pip` dependencies are expected to be one of the following lists:
-        -  Versioned dependency: three element lists in the format `["pip", "library", "version"]`
-        - Versioned dependency with additional flags: five element lists in the format `["pip", "library", "version", "--index-url", "URL"]`
-        - VCS-based dependency: four element lists in the format `['pip', 'URL']`. E.g `["pip", "git+https://github.com/bp-kelley/descriptastorus.git@9a190343bcd3cfd35142d378d952613bcac40797"]`.
-    - `conda` dependencies are expected to be four element lists in the format `["conda", "library", "version", "channel"]`, where channel is the conda channel to install the required library.
-    - For other `bash` commands, simply specify them as a oneliner string.
+### License
+This package is licensed under a [GPL-3.0](https://github.com/ersilia-os/ersilia/blob/master/LICENSE) license. The model contained within this package is licensed under a [Non-commercial](LICENSE) license.
 
-The installation parser will raise an exception if dependencies are not specified in the aforementioned format.
+**Notice**: Ersilia grants access to models _as is_, directly from the original authors, please refer to the original code repository and/or publication if you use the model in your research.
 
-#### Model Metadata
 
-Model metadata should be specified within `metadata.yml`. A detailed explanation of what the metadata fields correspond to can be found [here](https://ersilia.gitbook.io/ersilia-book/ersilia-model-hub/model-contribution/model-template). Note that some fields will be automatically updated upon model incorporation in Ersilia.
+## Use
+To use this model locally, you need to have the [Ersilia CLI](https://github.com/ersilia-os/ersilia) installed.
+The model can be **fetched** using the following command:
+```bash
+# fetch model from the Ersilia Model Hub
+ersilia fetch eos9bll
+```
+Then, you can **serve**, **run** and **close** the model as follows:
+```bash
+# serve the model
+ersilia serve eos9bll
+# generate an example file
+ersilia example -n 3 -f my_input.csv
+# run the model
+ersilia run -i my_input.csv -o my_output.csv
+# close the model
+ersilia close
+```
 
-#### Other Relevant Files
-
-- The `.dockerignore` file can be used to specify which files and folders should not be included in the eventual Docker image. By default, the `.git` folder is ignored. Other files to be ignored could include training data of the model, which is stored in S3 with eosvc but is not needed to run the model image. This is devised to reduce the final size of the images.
-
-- As you work with the model, use the `.gitignore` file appropriately to ensure that only relevant files are included in the model repository.
-
-- As mentioned above, the `README.md` file **should not be modified**. It will automatically be updated when the model is incorporated in the Ersilia Model Hub.
-
-## Tracking and Workflows
-
-- Weights the model loads go in `model/checkpoints/`. The folder is committed to git if every file is under 100 MiB; if any file is 100 MiB or larger, the whole folder is gitignored and persisted with the [EOSVC](https://github.com/ersilia-os/eosvc) tool, declared in an `access.json` file (public by default).
-- `model/framework/fit/` is persisted with EOSVC as soon as it holds training code or data, whatever its size. A model without a training step keeps the empty template skeleton in git.
-- Git LFS is not used, and models do not download weights at run time. See [Checkpoints and storage](https://ersilia.gitbook.io/ersilia-book/ersilia-model-hub/model-contribution/model-template#checkpoints-and-storage) in the Ersilia Book.
-- Models are not ready until they pass all GitHub Actions workflows.
+## About Ersilia
+The [Ersilia Open Source Initiative](https://ersilia.io) is a tech non-profit organization fueling sustainable research in the Global South.
+Please [cite](https://github.com/ersilia-os/ersilia/blob/master/CITATION.cff) the Ersilia Model Hub if you've found this model to be useful. Always [let us know](https://github.com/ersilia-os/ersilia/issues) if you experience any issues while trying to run it.
+If you want to contribute to our mission, consider [donating](https://www.ersilia.io/donate) to Ersilia!
